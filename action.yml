@@ -1,5 +1,5 @@
 name: "Laravel Setup (php.new)"
-description: "Install PHP via php.new on Linux, macOS, or Windows; verify; and install Composer packages."
+description: "Install PHP via php.new on Linux or Windows; verify; and install Composer packages."
 author: "Endkind"
 branding:
   icon: "package"
