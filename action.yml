@@ -1,0 +1,80 @@
+name: "Laravel Setup (php.new)"
+description: "Install PHP via php.new on Linux, macOS, or Windows; verify; and install Composer packages."
+author: "Endkind"
+branding:
+  icon: "package"
+  color: "purple"
+
+inputs:
+  php-version:
+    description: "PHP version to install via php.new"
+    required: false
+    default: "8.4"
+
+runs:
+  using: "composite"
+  steps:
+    # --- Install ---
+    - name: Install PHP via php.new (Linux)
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "Installing PHP ${PHP_VERSION} via php.new (Linux)…"
+        curl -fsSL "https://php.new/install/linux/${PHP_VERSION}"
+      env:
+        PHP_VERSION: ${{ inputs.php-version }}
+
+    - name: Fail on macOS (unsupported)
+      if: ${{ runner.os == 'macOS' }}
+      shell: bash
+      run: |
+        echo "macOS is unsupported by this action."
+        exit 1
+
+    - name: Install PHP via php.new (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      shell: pwsh
+      run: |
+        Write-Host "Installing PHP $env:PHP_VERSION via php.new (Windows)…"
+        curl.exe -fsSL "https://php.new/install/windows/$env:PHP_VERSION"
+      env:
+        PHP_VERSION: ${{ inputs.php-version }}
+
+    # --- Verify ---
+    - name: Verify PHP & Composer (Unix)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        php -v
+        composer --version
+
+    - name: Verify PHP & Composer (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      shell: pwsh
+      run: |
+        php -v
+        composer --version
+
+    # --- Composer install ---
+    - name: Install Composer dependencies (Unix)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -f "composer.json" ]; then
+          composer install --no-interaction --prefer-dist --no-progress
+        else
+          echo "No composer.json found — skipping composer install."
+        fi
+
+    - name: Install Composer dependencies (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      shell: pwsh
+      run: |
+        if (Test-Path -Path "composer.json") {
+          composer install --no-interaction --prefer-dist --no-progress
+        } else {
+          Write-Host "No composer.json found — skipping composer install."
+        }
